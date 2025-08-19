@@ -1,65 +1,51 @@
 #include <iostream>
-#include "R3.h"
+#include <list>
+#include "SistemaImpresion.h"
 using namespace std;
 
 int main() {
-    // ===== Puntos con int =====
-    R3<int> p1, p2;
-    int xi, yi, zi;
+    // 1) Crear sistema y agregar impresoras
+    SistemaImpresion sis;
+    sis.crear();
+    sis.agregarImpresora(Impresora("HP-Laser", true));
+    sis.agregarImpresora(Impresora("Epson-Color", true));
+    sis.agregarImpresora(Impresora("Brother-BN", false)); // inactiva
 
-    cout << "=== Puntos tipo int ===\n";
-    cout << "Ingrese x, y, z para el primer punto: ";
-    cin >> xi >> yi >> zi;
-    p1.setX(xi);
-    p1.setY(yi);
-    p1.setZ(zi);
+    cout << "\n[Estado inicial]\n";
+    sis.visualizarEstado();
 
-    cout << "Ingrese x, y, z para el segundo punto: ";
-    cin >> xi >> yi >> zi;
-    p2.setX(xi);
-    p2.setY(yi);
-    p2.setZ(zi);
+    // 2) Agregar trabajos: debe asignarlos a la impresora con menor carga
+    sis.agregarTrabajo("ReporteFinanzas.pdf", "Ana", 3);
+    sis.agregarTrabajo("Contrato.docx", "Luis", 2);
+    sis.agregarTrabajo("Planos.dwg", "Marta", 5);
 
-    cout << "Distancia (int): " << p1.distancia(p2) << "\n\n";
+    cout << "\n[Tras agregar 3 trabajos]\n";
+    sis.visualizarEstado();
 
+    // 3) Simular impresión por “ticks” (cada tick imprime 1 página del trabajo en curso)
+    for (int i = 1; i <= 6; ++i) {
+        sis.tick();
+        cout << "\n[TICK " << i << "]\n";
+        sis.visualizarEstado();
+    }
 
-    // ===== Puntos con long =====
-    R3<long> p3, p4;
-    long xl, yl, zl;
+    // 4) Activar la impresora inactiva y enviarle un trabajo
+    cout << "\n[Activando Brother-BN y agregando trabajo]\n";
+    // Nota: activar/desactivar es sobre cada impresora; aquí lo haríamos recorriendo la lista
+    for (Impresora &imp : const_cast<list<Impresora>&>(sis.getImpresoras())) {
+        if (imp.getNombre() == "Brother-BN") imp.activar();
+    }
+    sis.agregarTrabajo("Presentacion.pptx", "Sara", 4);
 
-    cout << "=== Puntos tipo long ===\n";
-    cout << "Ingrese x, y, z para el primer punto: ";
-    cin >> xl >> yl >> zl;
-    p3.setX(xl);
-    p3.setY(yl);
-    p3.setZ(zl);
+    cout << "\n[Después de activar y agregar 1 trabajo]\n";
+    sis.visualizarEstado();
 
-    cout << "Ingrese x, y, z para el segundo punto: ";
-    cin >> xl >> yl >> zl;
-    p4.setX(xl);
-    p4.setY(yl);
-    p4.setZ(zl);
-
-    cout << "Distancia (long): " << p3.distancia(p4) << "\n\n";
-
-
-    // ===== Puntos con double =====
-    R3<double> p5, p6;
-    double xd, yd, zd;
-
-    cout << "=== Puntos tipo double ===\n";
-    cout << "Ingrese x, y, z para el primer punto: ";
-    cin >> xd >> yd >> zd;
-    p5.setX(xd);
-    p5.setY(yd);
-    p5.setZ(zd);
- cout << "Ingrese x, y, z para el segundo punto: ";
-    cin >> xd >> yd >> zd;
-    p6.setX(xd);
-    p6.setY(yd);
-    p6.setZ(zd);
-
-    cout << "Distancia (double): " << p5.distancia(p6) << "\n";
+    // 5) Más ticks para observar nuevos despachos
+    for (int i = 7; i <= 12; ++i) {
+        sis.tick();
+        cout << "\n[TICK " << i << "]\n";
+        sis.visualizarEstado();
+    }
 
     return 0;
 }
